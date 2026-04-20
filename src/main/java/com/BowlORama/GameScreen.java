@@ -18,6 +18,7 @@ import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.Scene;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import net.mgsx.gltf.scene3d.scene.SceneManager;
+import java.util.ArrayList;
 
 public class GameScreen implements Screen{
 
@@ -32,7 +33,7 @@ public class GameScreen implements Screen{
     //classes initializtion
     Map map;
     Ball ball;
-    Pins pin;
+    ArrayList<Pins> pin;
 
     public GameScreen(){
         //NUll pointer Exception occurs bcz it first initalizes the map then gamescreen so screenmanager uninitialized
@@ -85,14 +86,19 @@ public class GameScreen implements Screen{
         sceneManager.environment.add(light);
 
         // Add ambient/skybox light
-        sceneManager.setAmbientLight(0.3f); //Only this line can suufice also but proper light is good
+        sceneManager.setAmbientLight(0.3f); //Only this line can suffice also but proper light is good
 
         map.create();
 
         ball = new Ball(camera, sceneManager, map);
         ball.create();
-        pin= new Pins(sceneManager, camera, map , pinasset);
-        pin.create();
+
+        pin = new ArrayList<>();
+        for(int i = 0 ; i < 10 ; i++){
+        pin.add(new Pins(sceneManager, camera, map , pinasset));
+        pin.get(i).create(i);
+        }
+
         eventHandler = new EventHandler(ball);
         
 
