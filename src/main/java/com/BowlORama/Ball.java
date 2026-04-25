@@ -44,8 +44,6 @@ public class Ball {
 
     SceneAsset ball;
     Scene ballScene;
-    Vector3 position2;
-    float rollAngle = 0;
 
     boolean thrown = false;
     boolean movedown = false;
@@ -65,10 +63,8 @@ public class Ball {
         ball = new GLBLoader().load(Gdx.files.internal("Ball.glb"));
         ballScene = new Scene(ball.scene);
 
-        ballScene.modelInstance.transform.setToTranslation(0,map.getpathheight()+0.5f,-29f);
+        ballScene.modelInstance.transform.setToTranslation(0,map.getpathheight()+0.5f,-40f);
         ballScene.modelInstance.transform.scale(0.6f, 0.6f, 0.6f);
-        position2  = new Vector3(0,map.getpathheight()+0.5f,-29);
-
         sceneManager.addScene(ballScene);
     }
 

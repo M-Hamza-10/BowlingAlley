@@ -1,5 +1,6 @@
 package com.BowlORama;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
 import com.badlogic.gdx.physics.bullet.Bullet;
@@ -33,6 +34,9 @@ public class CollisionPhysics {
     private btRigidBody laneBody;
     private btRigidBody leftGutterBody;
     private btRigidBody rightGutterBody;
+    
+    private btRigidBody leftGutterSidewallBody;
+    private btRigidBody rightGutterSidewallBody;
 
     private btRigidBody ballBody;
 
@@ -41,6 +45,7 @@ public class CollisionPhysics {
     private Map map;
     private ArrayList<Pins> pin;
     private Ball ball;
+    private float ballradius = 0.6f;
 
     public CollisionPhysics(Map map , ArrayList<Pins> pin , Ball ball) {
 
@@ -61,6 +66,7 @@ public class CollisionPhysics {
         createGutters();
         createBall();
         createPins();
+        creategutterwalls();
     }
 
     private void createLane() {
@@ -80,8 +86,8 @@ public class CollisionPhysics {
         map.gutterscene.modelInstance.transform.getTranslation(pos);
         Vector3 pos2 = new Vector3();
         map.gutter2scene.modelInstance.transform.getTranslation(pos2);
-        leftGutterBody = createStaticBody(gutterShape, new Vector3(pos2.x,pos2.y-1f,pos2.z));
-        rightGutterBody = createStaticBody(gutterShape, new Vector3(pos.x,pos.y-1f,pos.z));
+        leftGutterBody = createStaticBody(gutterShape, new Vector3(pos2.x,pos2.y-0.9f,pos2.z));
+        rightGutterBody = createStaticBody(gutterShape, new Vector3(pos.x,pos.y-0.9f,pos.z));
 
         leftGutterBody.setFriction(0.9f);
         rightGutterBody.setFriction(0.9f);
@@ -92,10 +98,10 @@ public class CollisionPhysics {
 
     private void createBall() {
 
-        ballShape = new btSphereShape(0.6f);
+        ballShape = new btSphereShape(ballradius);
         Vector3 pos = new Vector3();
         ball.ballScene.modelInstance.transform.getTranslation(pos);
-        ballBody = createDynamicBody(ballShape, pos, 5f);
+        ballBody = createDynamicBody(ballShape, new Vector3(pos.x , pos.y+ballradius , pos.z), 5f);
         
 
         world.addRigidBody(ballBody);
@@ -117,6 +123,15 @@ public class CollisionPhysics {
 
             }
 
+    }
+    private void creategutterwalls(){
+
+        leftGutterSidewallBody = createStaticGutterSideBody(gutterShape, new Vector3(map.getpathwidht()/2+1.3f , 1f , 0f));
+        world.addRigidBody(leftGutterSidewallBody);
+        
+        rightGutterSidewallBody = createStaticGutterSideBody(gutterShape, new Vector3(-map.getpathwidht()/2-1.3f , 1f , 0f));
+        world.addRigidBody(rightGutterSidewallBody);
+        
     }
 
     private btRigidBody createStaticBody(btCollisionShape shape, Vector3 position) {
@@ -167,10 +182,22 @@ public class CollisionPhysics {
     }
 
     public void update(float delta) {
+         
         world.stepSimulation(delta, 1, 1f / 60f);
         // Ball sync
         ballBody.getWorldTransform(ball.ballScene.modelInstance.transform);
-        ball.ballScene.modelInstance.transform.scale(0.6f,0.6f,0.6f);
+        Matrix4 temp = new Matrix4();
+        Vector3 pos = new Vector3();
+        Quaternion rot = new Quaternion();
+
+        ballBody.getWorldTransform(temp);
+
+        temp.getTranslation(pos);
+        temp.getRotation(rot);
+
+        ball.ballScene.modelInstance.transform.idt();
+        ball.ballScene.modelInstance.transform.set(pos, rot);
+        ball.ballScene.modelInstance.transform.scale(0.6f, 0.6f, 0.6f);
 
         // Pins sync
         for (int i = 0; i < pinBodies.size(); i++) {

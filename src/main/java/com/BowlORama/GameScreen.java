@@ -68,7 +68,7 @@ public class GameScreen implements Screen{
         
         // called once when screen starts  like create
         
-        camera.position.set(0f, (map.getpathheight() + 2), -(map.getpathdepth()/2 - 1));
+        camera.position.set(0f, (map.getpathheight() + 2), -(map.getpathdepth()/2 +1f));
         camera.lookAt(0,0,0);
         camera.near = 0.1f;
         camera.far = 100f;

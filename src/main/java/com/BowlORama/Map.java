@@ -52,7 +52,7 @@ public class Map {
 
     private float pathwidth = 7f;
     private float pathheight = 1f;
-    private float pathdepth = 70f;
+    private float pathdepth = 90f;
 
     ModelBuilder modelBuilder;
 
@@ -105,7 +105,7 @@ private void initModels(){
             VertexAttributes.Usage.Normal |
             VertexAttributes.Usage.TextureCoordinates);
 
-    externalpath = modelBuilder.createBox(pathwidth + 80f, pathheight, pathdepth + 55f,
+    externalpath = modelBuilder.createBox(pathwidth + 80f, pathheight, pathdepth + 70f,
             material2,
             VertexAttributes.Usage.Position |
             VertexAttributes.Usage.Normal |
