@@ -50,7 +50,7 @@ public class Map {
         this.sceneManager = sceneManager;
     }
 
-    private float pathwidth = 6f;
+    private float pathwidth = 7f;
     private float pathheight = 1f;
     private float pathdepth = 70f;
 
@@ -180,11 +180,11 @@ private void initBackBoards(){
     backBoardScene.modelInstance.transform.setToTranslation(0,30,pathdepth/2);
 
     backBoardScene2 = new Scene(backBoardInstance2);
-    backBoardScene2.modelInstance.transform.setToTranslation((pathwidth/2)+30,0,pathdepth/2);
+    backBoardScene2.modelInstance.transform.setToTranslation((pathwidth/2)+32,0,pathdepth/2);
     backBoardScene2.modelInstance.transform.scale(pathwidth/10,1,1);
 
     backBoardScene3 = new Scene(backBoardInstance3);
-    backBoardScene3.modelInstance.transform.setToTranslation(-((pathwidth/2)+30),0,pathdepth/2);
+    backBoardScene3.modelInstance.transform.setToTranslation(-((pathwidth/2)+32),0,pathdepth/2);
     backBoardScene3.modelInstance.transform.scale(pathwidth/10,1,1);
 }
 

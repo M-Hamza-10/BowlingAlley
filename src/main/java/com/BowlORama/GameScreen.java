@@ -34,6 +34,7 @@ public class GameScreen implements Screen{
     Map map;
     Ball ball;
     ArrayList<Pins> pin;
+    CollisionPhysics collisondetector;
 
     public GameScreen(){
         //NUll pointer Exception occurs bcz it first initalizes the map then gamescreen so screenmanager uninitialized
@@ -47,6 +48,7 @@ public class GameScreen implements Screen{
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         eventHandler.handleball(delta);
+        collisondetector.update(delta);
         sceneManager.update(delta);
         sceneManager.render();
 
@@ -99,7 +101,8 @@ public class GameScreen implements Screen{
         pin.get(i).create(i);
         }
 
-        eventHandler = new EventHandler(ball);
+        collisondetector = new CollisionPhysics(map, pin, ball);
+        eventHandler = new EventHandler(ball, collisondetector , camera);
         
 
         //System.out.println("Show ");
