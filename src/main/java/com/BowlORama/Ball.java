@@ -66,7 +66,7 @@ public class Ball {
         ballScene = new Scene(ball.scene);
 
         ballScene.modelInstance.transform.setToTranslation(0,map.getpathheight()+0.5f,-29f);
-        ballScene.modelInstance.transform.scale(0.5f, 0.5f, 0.5f);
+        ballScene.modelInstance.transform.scale(0.6f, 0.6f, 0.6f);
         position2  = new Vector3(0,map.getpathheight()+0.5f,-29);
 
         sceneManager.addScene(ballScene);
@@ -78,35 +78,17 @@ public class Ball {
 
     public void update(float delta){
 
-        if(thrown){
-        position2.z += speed * delta;     // move straight forward
-        rollAngle += 600 * delta;        // rotate
-        ballScene.modelInstance.transform.idt();
-        ballScene.modelInstance.transform.setToTranslation(position2);
-        ballScene.modelInstance.transform.rotate(Vector3.X, rollAngle);
-        ballScene.modelInstance.transform.scale(0.5f, 0.5f, 0.5f);
-        camera.position.add(0,0,speed * delta);
-        if(!movedown)
-            camera.update();
-        if(position2.z > (map.getpathdepth()/2f)-0.5f){
-            ballScene.modelInstance.transform.translate(0,10f,0);
-            movedown = true;
-        }
+        // if(thrown){
+        // camera.position.add(0,0,speed * delta);
+        // camera.update();
+        //     if(camera.position.z > (map.getpathdepth()/2f)-1f)
+        //     thrown = false;
 
-        if(movedown){
-        position2.y -= speed * delta;
-        ballScene.modelInstance.transform.setToTranslation(position2);
-        ballScene.modelInstance.transform.rotate(Vector3.X, rollAngle);
-        ballScene.modelInstance.transform.scale(0.7f, 0.7f, 0.7f);
-
-        if(position2.y < -3f){
-            thrown = false;
-            movedown = false;
-        }
-        }
-        }
+        // }
+        // }
 
     }
+
     public void dispose(){
         ball.dispose();
     }
