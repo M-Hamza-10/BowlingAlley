@@ -198,14 +198,20 @@ public class CollisionPhysics {
         ball.ballScene.modelInstance.transform.idt();
         ball.ballScene.modelInstance.transform.set(pos, rot);
         ball.ballScene.modelInstance.transform.scale(0.6f, 0.6f, 0.6f);
+        setinitialpins();
+       
 
-        // Pins sync
+    }
+
+    private void setinitialpins(){
+         // Pins sync
         for (int i = 0; i < pinBodies.size(); i++) {
             pinBodies.get(i).getWorldTransform(
                 pin.get(i).pinscene.modelInstance.transform
             );
         }
     }
+
         
 
     public btRigidBody getBallBody() {

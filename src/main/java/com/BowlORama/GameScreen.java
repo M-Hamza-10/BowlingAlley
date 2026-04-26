@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.math.Vector3;
+
 import java.io.InputStream;
 import com.badlogic.gdx.Game;
 
@@ -34,6 +36,7 @@ public class GameScreen implements Screen{
     Map map;
     Ball ball;
     ArrayList<Pins> pin;
+    ArrayList<Vector3> temppins;
     CollisionPhysics collisondetector;
 
     public GameScreen(){
@@ -96,18 +99,21 @@ public class GameScreen implements Screen{
         ball.create();
 
         pin = new ArrayList<>();
+        temppins = new ArrayList<>();
         for(int i = 0 ; i < 10 ; i++){
         pin.add(new Pins(sceneManager, camera, map , pinasset));
         pin.get(i).create(i);
+        Vector3 pos = new Vector3();
+        pin.get(i).pinscene.modelInstance.transform.getTranslation(pos);
+        temppins.add(pos);
         }
 
         collisondetector = new CollisionPhysics(map, pin, ball);
-        eventHandler = new EventHandler(ball, collisondetector , camera);
+        eventHandler = new EventHandler(ball, collisondetector , camera , map , temppins , pin);
         
 
         //System.out.println("Show ");
     }
-
 
 
     @Override

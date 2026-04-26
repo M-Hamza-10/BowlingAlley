@@ -1,5 +1,7 @@
 package com.BowlORama;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -16,55 +18,50 @@ public class EventHandler {
     CollisionPhysics collisionDetector;
     PerspectiveCamera camera;
     Vector3 pos;
+    Map map;
+    ArrayList<Pins> pin;
+    ArrayList<Vector3> pininitposition;
 
     boolean spidercamview = false;
 
     private boolean thrown = false;
     private boolean blocked = false;
+    private boolean timerstart = false;
+    private float timer = 0f;
+    final int max_no_of_turns = 2;
+    private int no_of_turns = 0;
+    private final float waittimer = 7f;
+    private boolean inputblocked = false;
 
-    public EventHandler(Ball ball , CollisionPhysics collsiondetector , PerspectiveCamera camera){
+    public EventHandler(Ball ball , CollisionPhysics collsiondetector , PerspectiveCamera camera , Map map , ArrayList<Vector3> pininitposition , ArrayList<Pins> pin){
         this.ball = ball;
         this.collisionDetector = collsiondetector;
         this.camera = camera;
         pos = new Vector3();
+        this.map = map;
+        this.pininitposition = pininitposition;
+        this.pin = pin;
     }
 
     public void handleball(float delta){
         
         handlemousePhysics(5f);
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !inputblocked){
+            inputblocked = true;
            collisionDetector.shootBall(new Vector3(0f,0f, 80f));
            thrown = true;
             collisionDetector.getBallBody().getWorldTransform().getTranslation(pos);  
         }
         handlecamera(delta);
         // ball.update(delta);   // continuous movement here
-            if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-                ///Rigid body reference is required to change position gettranslation only gives position values
-                btRigidBody body = collisionDetector.getBallBody();
 
-                Matrix4 transform = body.getWorldTransform();
-
-                transform.getTranslation(pos);
-
-                pos.x -= 1f;
-
-                transform.setTranslation(pos);
-                body.setWorldTransform(transform);
-            }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-
-            btRigidBody body = collisionDetector.getBallBody();
-
-            Matrix4 transform = body.getWorldTransform();
-            transform.getTranslation(pos);
-
-            pos.x += 1f;
-
-            transform.setTranslation(pos);
-            body.setWorldTransform(transform);
+        if(timerstart){
+            timer+=delta;
         }
+        if(timer > waittimer){
+            reset(delta);
+        }
+
     }
 
     private void handlecamera(float delta){
@@ -88,8 +85,10 @@ public class EventHandler {
             camera.lookAt(pos2.x, pos2.y, pos2.z + 5f);
             camera.update();
 
-            if (camera.position.z > (70f / 2f) - 5f)
+            if (camera.position.z > (70f / 2f) - 5f){
                 thrown = false;
+                timerstart = true;
+            }
         }
     }
 
@@ -121,6 +120,73 @@ public class EventHandler {
         Matrix4 transform = body.getWorldTransform();
         transform.setTranslation(mousepos);
         body.setWorldTransform(transform);
+
         }
     }
+
+
+
+    //Make two methods reset without pins and with pins 
+    //Also correct setpins of collisionphysics.java because it sets the pin where they are
+    //Better use temp array to store their initialposiiton or better take pin refernce and call create method
+    //10 times (YOUR CHOICE!)
+    private void reset(float dt){
+
+        //---------------RESET BALL-------------------------
+        ball.thrown = false;
+        thrown = false;
+         btRigidBody ballbody = collisionDetector.getBallBody();
+          Vector3 initball = ball.getballcoordinates();
+        Matrix4 transform = new Matrix4();
+        //Matrix4 transform = ballbody.getWorldTransform();
+        //transform.setTranslation(initball);
+        transform.set(initball , ball.getballinitroattion());
+        ballbody.setWorldTransform(transform);
+        ballbody.proceedToTransform(transform);
+        ballbody.clearForces();
+        ballbody.setAngularVelocity(new Vector3(0,0,0));
+        ballbody.setLinearVelocity(new Vector3(0,0,0));
+        ballbody.activate();
+        //-----------CAMERA-------------------
+         Vector3 pos2 = new Vector3();
+        collisionDetector.getBallBody().getWorldTransform().getTranslation(pos2);
+        timer = 0f;
+        timerstart = false;
+        // camera.position.x = 0f;
+        camera.position.y = (pos2.y + 2f);
+        camera.position.z = pos2.z-6f;
+        spidercamview = false;
+        camera.update();
+        inputblocked = false;
+        blocked = false;
+        no_of_turns++;
+        if(no_of_turns >= max_no_of_turns){
+        no_of_turns = 0;
+         //----------------------RESET PINS------------------
+        resetpins();
+        }
+    }
+public void resetpins() {
+
+    for (int i = 0; i < pininitposition.size(); i++) {
+
+        btRigidBody body = collisionDetector.getPinBodies().get(i);
+
+        Matrix4 transform = new Matrix4();
+
+        transform.set(
+            pininitposition.get(i),
+            pin.get(i).getpinrotation()   // original upright quaternion
+        );
+
+        body.setLinearVelocity(Vector3.Zero);
+        body.setAngularVelocity(Vector3.Zero);
+        body.clearForces();
+
+        body.setWorldTransform(transform);
+        body.proceedToTransform(transform);
+
+        body.activate();
+    }
+}
 }
