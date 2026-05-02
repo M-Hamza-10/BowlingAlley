@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
@@ -22,16 +23,17 @@ public class EventHandler {
     ArrayList<Pins> pin;
     ArrayList<Vector3> pininitposition;
 
-    boolean spidercamview = false;
-
+    public boolean  turnended = false;
+    private boolean spidercamview = false;
     private boolean thrown = false;
     private boolean blocked = false;
     private boolean timerstart = false;
+    private boolean inputblocked = false;
     private float timer = 0f;
     final int max_no_of_turns = 2;
     private int no_of_turns = 0;
     private final float waittimer = 7f;
-    private boolean inputblocked = false;
+    
 
     public EventHandler(Ball ball , CollisionPhysics collsiondetector , PerspectiveCamera camera , Map map , ArrayList<Vector3> pininitposition , ArrayList<Pins> pin){
         this.ball = ball;
@@ -48,7 +50,7 @@ public class EventHandler {
         handlemousePhysics(5f);
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !inputblocked){
             inputblocked = true;
-           collisionDetector.shootBall(new Vector3(0f,0f, 80f));
+           collisionDetector.shootBall(new Vector3(0f,0f, 120f));
            thrown = true;
             collisionDetector.getBallBody().getWorldTransform().getTranslation(pos);  
         }
@@ -59,6 +61,7 @@ public class EventHandler {
             timer+=delta;
         }
         if(timer > waittimer){
+            turnended = true;
             reset(delta);
         }
 
@@ -126,11 +129,7 @@ public class EventHandler {
 
 
 
-    //Make two methods reset without pins and with pins 
-    //Also correct setpins of collisionphysics.java because it sets the pin where they are
-    //Better use temp array to store their initialposiiton or better take pin refernce and call create method
-    //10 times (YOUR CHOICE!)
-    private void reset(float dt){
+    public void reset(float dt){
 
         //---------------RESET BALL-------------------------
         ball.thrown = false;
@@ -152,9 +151,10 @@ public class EventHandler {
         collisionDetector.getBallBody().getWorldTransform().getTranslation(pos2);
         timer = 0f;
         timerstart = false;
-        // camera.position.x = 0f;
+        camera.position.x = 0f;
         camera.position.y = (pos2.y + 2f);
-        camera.position.z = pos2.z-6f;
+        camera.position.z = pos2.z - 6f;
+        camera.lookAt(0f, 0f, 0f);
         spidercamview = false;
         camera.update();
         inputblocked = false;
@@ -163,7 +163,7 @@ public class EventHandler {
         if(no_of_turns >= max_no_of_turns){
         no_of_turns = 0;
          //----------------------RESET PINS------------------
-        resetpins();
+        // resetpins();
         }
     }
 public void resetpins() {
@@ -189,4 +189,28 @@ public void resetpins() {
         body.activate();
     }
 }
+
+    public boolean quaternionsEqual(Quaternion q1, Quaternion q2, float epsilon) {
+
+    return Math.abs(q1.x - q2.x) < epsilon &&
+           Math.abs(q1.y - q2.y) < epsilon &&
+           Math.abs(q1.z - q2.z) < epsilon &&
+           Math.abs(q1.w - q2.w) < epsilon;
+    }
+    public int getpindowns(){
+
+        int pinsdown = 0;
+
+        float tolerance = 0.01f;
+        for(int i = 0 ; i < pininitposition.size() ; i++){
+            
+            Quaternion a = collisionDetector.getpinbodyrotation(i);
+            Quaternion b = pin.get(i).getpinrotation();
+            if(!quaternionsEqual(a,b,tolerance)){
+                pinsdown++;
+            }
+        }
+        return pinsdown;
+    }
+
 }

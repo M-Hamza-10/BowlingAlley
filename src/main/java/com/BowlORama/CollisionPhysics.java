@@ -15,14 +15,18 @@ import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
-
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstructionInfo;
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 
 import java.util.ArrayList;
 import java.util.Vector;
 
 public class CollisionPhysics {
-
+    
+    private btDefaultCollisionConfiguration config;
+    btCollisionDispatcher dispatcher;
+    btDbvtBroadphase broadphase;
+    btSequentialImpulseConstraintSolver solver;
     private btDiscreteDynamicsWorld world;
 
     private btCollisionShape laneShape;
@@ -54,10 +58,10 @@ public class CollisionPhysics {
         this.pin = pin;
         this.ball = ball;
 
-        btDefaultCollisionConfiguration config = new btDefaultCollisionConfiguration();
-        btCollisionDispatcher dispatcher = new btCollisionDispatcher(config);
-        btDbvtBroadphase broadphase = new btDbvtBroadphase();
-        btSequentialImpulseConstraintSolver solver = new btSequentialImpulseConstraintSolver();
+        config = new btDefaultCollisionConfiguration();
+        dispatcher = new btCollisionDispatcher(config);
+        broadphase = new btDbvtBroadphase();
+        solver = new btSequentialImpulseConstraintSolver();
 
         world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, config);
         world.setGravity(new Vector3(0, -9.81f, 0));
@@ -175,8 +179,8 @@ public class CollisionPhysics {
         Vector3 inertia = new Vector3();
         shape.calculateLocalInertia(mass, inertia);
 
-        btRigidBody.btRigidBodyConstructionInfo info =
-                new btRigidBody.btRigidBodyConstructionInfo(mass, motion, shape, inertia);
+        btRigidBody.btRigidBodyConstructionInfo info = new btRigidBody.btRigidBodyConstructionInfo(mass, motion, shape, inertia);
+        
 
         return new btRigidBody(info);
     }
@@ -237,6 +241,13 @@ public class CollisionPhysics {
 
     ballBody.applyCentralImpulse(force);
 }
+    public Quaternion getpinbodyrotation(int i){
+
+        Matrix4 transform = new Matrix4();
+        pinBodies.get(i).getWorldTransform(transform);
+        Quaternion rotation = new Quaternion();
+        return transform.getRotation(rotation);
+    }
 
     public void dispose() {
 
@@ -251,7 +262,14 @@ public class CollisionPhysics {
         laneBody.dispose();
         leftGutterBody.dispose();
         rightGutterBody.dispose();
+        leftGutterSidewallBody.dispose();
+        rightGutterSidewallBody.dispose();
 
+
+        config.dispose();
+        dispatcher.dispose();
+        broadphase.dispose();
+        solver.dispose();
         laneShape.dispose();
         gutterShape.dispose();
         ballShape.dispose();

@@ -30,6 +30,7 @@ public class GameScreen implements Screen{
 
     private EventHandler eventHandler;
     private SceneAsset pinasset;
+    private Scorecardgraphics scorecardgraphics;
     
 
     //classes initializtion
@@ -38,6 +39,7 @@ public class GameScreen implements Screen{
     ArrayList<Pins> pin;
     ArrayList<Vector3> temppins;
     CollisionPhysics collisondetector;
+    TurnManager turnManager;
 
     public GameScreen(){
         //NUll pointer Exception occurs bcz it first initalizes the map then gamescreen so screenmanager uninitialized
@@ -52,8 +54,12 @@ public class GameScreen implements Screen{
 
         eventHandler.handleball(delta);
         collisondetector.update(delta);
+        turnManager.manageturn(delta);
         sceneManager.update(delta);
         sceneManager.render();
+        turnManager.render(delta);
+       // scorecardgraphics.render(delta);
+        
 
         //System.out.println("Screen MAnager render........................................");
         //renders all objects like camera environment automatically and no need to change it
@@ -110,7 +116,7 @@ public class GameScreen implements Screen{
 
         collisondetector = new CollisionPhysics(map, pin, ball);
         eventHandler = new EventHandler(ball, collisondetector , camera , map , temppins , pin);
-        
+        turnManager = new TurnManager(eventHandler);
 
         //System.out.println("Show ");
     }
