@@ -11,12 +11,13 @@ public class TurnManager {
     public TurnManager(EventHandler turnHandler){
         this.turnhandler = turnHandler;
        player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1));
-       player2 = new Computer(new BowlingScore(), new Scorecardgraphics(2));
+       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2));
        setturn(player1);
     }
 
     public void setturn(Player player){
         currentPlayer = player;
+        tempturn = currentPlayer.getturn();
     }
 
     public void setscore(){
@@ -27,14 +28,22 @@ public class TurnManager {
     public void manageturn(float dt){
         if(turnhandler.turnended){
             setscore();
-            if(currentPlayer.getsubturn() >= 2){
+            currentPlayer.update();
+            boolean frameChanged = (tempturn != currentPlayer.getturn());
+
+        if (frameChanged) {
+            turnhandler.resetpins();
+            if (currentPlayer instanceof Player1)
+                setturn(player2);
+            else
+                setturn(player1);
+            } else if (currentPlayer.getsubturn() == 1) {
                 turnhandler.reset(dt);
-                turnhandler.resetpins(); 
             }
-            else if(tempturn != currentPlayer.getturn() ){
-                tempturn = currentPlayer.getturn();
+            else if(currentPlayer.getsubturn() >= 3){
+                turnhandler.reset(dt);
                 turnhandler.resetpins();
-                if(currentPlayer instanceof Player1)
+                if (currentPlayer instanceof Player1)
                     setturn(player2);
                 else
                     setturn(player1);
