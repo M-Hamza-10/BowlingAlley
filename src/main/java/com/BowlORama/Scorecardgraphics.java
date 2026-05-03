@@ -1,20 +1,25 @@
-    package com.BowlORama;
+package com.BowlORama;
 
-    import java.util.ArrayList;
-
-    import com.badlogic.gdx.Gdx;
-    import com.badlogic.gdx.graphics.Color;
-    import com.badlogic.gdx.graphics.Pixmap;
-    import com.badlogic.gdx.graphics.Texture;
-    import com.badlogic.gdx.graphics.g2d.BitmapFont;
-    import com.badlogic.gdx.graphics.g2d.TextureRegion;
-    import com.badlogic.gdx.scenes.scene2d.Stage;
-    import com.badlogic.gdx.scenes.scene2d.ui.Label;
-    import com.badlogic.gdx.scenes.scene2d.ui.Table;
-    import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-    import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-    import com.badlogic.gdx.utils.Align;
-    import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import java.util.ArrayList;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.math.Interpolation;
 
     public class Scorecardgraphics {
 
@@ -30,6 +35,9 @@
         private Label.LabelStyle labelStyle;
         private int pos;
 
+        private ImageButton menuButton;
+        private Texture menubtntexture;
+
         public Scorecardgraphics(int i){
             pos = i;
         }
@@ -40,15 +48,19 @@
 
             Table board = createBoard();
             Table playerboard = createPlayerBoard();
+            Table menuboard = createmenuboard();
             addFrames(board);
             addPlayerHeader(playerboard);
+            addbutton(menuboard);
 
             stage.addActor(board );
             stage.addActor(playerboard);
+            stage.addActor(menuboard);
         }
 
         private void createStage() {
             stage = new Stage(new ScreenViewport());
+            Gdx.input.setInputProcessor(stage);
         }
 
         private void createDrawables() {
@@ -65,6 +77,9 @@
             // Main board image
             Texture boardTex = new Texture("scorecardUI3.png");
             boardBackground = new TextureRegionDrawable(boardTex);
+
+            menubtntexture = new Texture("menubutton.png");
+            createmenubutton();
         }
 
         private void createLabelStyle() {
@@ -103,6 +118,16 @@
             return board;
         }
 
+        private Table createmenuboard(){
+            Table board = new Table();
+            //board.top().padBottom(10f);
+            board.center();
+            board.setSize(140f, 55f);
+            board.setPosition(10f,0f);
+
+            return board;
+        }
+
         private void addPlayerHeader(Table board) {
             Label player = new Label("PLAYER: KALIA", labelStyle);
             player.setColor(Color.WHITE);;
@@ -121,6 +146,10 @@
             framesRow.add(createTotalFrame()).pad(2);
 
             board.add(framesRow);
+        }
+
+        private void addbutton(Table board){
+            board.add(menuButton).width(200).height(100);
         }
 
 
@@ -189,6 +218,40 @@
         public void setTotalScore(String score) {
             totalScore.setText(score);
         }
+
+    public void createmenubutton(){
+
+        menuButton = new ImageButton(new TextureRegionDrawable(menubtntexture));
+        menuButton.setSize(140f, 55f);
+
+        // REQUIRED for scaling visuals
+        menuButton.setTransform(true);
+
+        // Scale from center
+        menuButton.setOrigin(menuButton.getWidth() / 2f, menuButton.getHeight() / 2f);
+
+        menuButton.addListener(new ClickListener() {
+
+        @Override
+        public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+
+            menuButton.clearActions();
+
+            menuButton.addAction(
+                Actions.scaleTo(1.12f, 1.12f, 0.15f , Interpolation.swingOut)
+            );
+        }
+
+        @Override
+        public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+
+            menuButton.clearActions();
+
+            menuButton.addAction(
+                Actions.scaleTo(1f, 1f, 0.15f)
+            );
+        }});
+    }
 
 
         public void render(float delta) {

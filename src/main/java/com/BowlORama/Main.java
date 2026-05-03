@@ -18,6 +18,11 @@ public class Main extends Game {
 
     @Override
     public void create() {
+        setScreen(new MainMenu(this));
+        
+    }
+
+    public void play(){
         setScreen(new GameScreen());
     }
 
