@@ -1,7 +1,6 @@
 package com.BowlORama;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,15 +8,10 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.math.Vector3;
-
-import java.io.InputStream;
-import com.badlogic.gdx.Game;
 
 import net.mgsx.gltf.loaders.glb.GLBLoader;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
-import net.mgsx.gltf.scene3d.scene.Scene;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import net.mgsx.gltf.scene3d.scene.SceneManager;
 import java.util.ArrayList;
@@ -30,7 +24,9 @@ public class GameScreen implements Screen{
 
     private EventHandler eventHandler;
     private SceneAsset pinasset;
-    private Scorecardgraphics scorecardgraphics;
+    //private Scorecardgraphics scorecardgraphics;
+    private Main game;
+    private boolean initialized;
     
 
     //classes initializtion
@@ -40,8 +36,10 @@ public class GameScreen implements Screen{
     ArrayList<Vector3> temppins;
     CollisionPhysics collisondetector;
     TurnManager turnManager;
+    public boolean paused = false;
 
-    public GameScreen(){
+    public GameScreen(Main game){
+        this.game = game;
         //NUll pointer Exception occurs bcz it first initalizes the map then gamescreen so screenmanager uninitialized
         // map = new Map(camera, sceneManager);
         //Do not add heavy objects here like camera
@@ -51,7 +49,7 @@ public class GameScreen implements Screen{
     public void render(float delta){
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
+        if(!paused){
         eventHandler.handleball(delta);
         collisondetector.update(delta);
         turnManager.manageturn(delta);
@@ -59,6 +57,7 @@ public class GameScreen implements Screen{
         sceneManager.render();
         turnManager.render(delta);
        // scorecardgraphics.render(delta);
+        }
         
 
         //System.out.println("Screen MAnager render........................................");
@@ -68,7 +67,8 @@ public class GameScreen implements Screen{
 
     @Override
     public void show() {
-
+        if(initialized)
+            return;
         sceneManager = new SceneManager();
         camera = new PerspectiveCamera(67,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         map = new Map(camera, sceneManager);
@@ -116,8 +116,8 @@ public class GameScreen implements Screen{
 
         collisondetector = new CollisionPhysics(map, pin, ball);
         eventHandler = new EventHandler(ball, collisondetector , camera , map , temppins , pin);
-        turnManager = new TurnManager(eventHandler);
-
+        turnManager = new TurnManager(eventHandler ,game , this);
+        initialized = true;
         //System.out.println("Show ");
     }
 

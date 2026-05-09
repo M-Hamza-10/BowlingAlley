@@ -19,7 +19,6 @@ import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody.btRigidBodyConstruct
 import com.badlogic.gdx.physics.bullet.linearmath.btDefaultMotionState;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class CollisionPhysics {
     
@@ -45,6 +44,8 @@ public class CollisionPhysics {
     private btRigidBody ballBody;
 
     private ArrayList<btRigidBody> pinBodies = new ArrayList<>();
+    private ArrayList<btRigidBodyConstructionInfo> constructionInfos = new ArrayList<>();
+    private ArrayList<btDefaultMotionState> motionStates = new ArrayList<>();
 
     private Map map;
     private ArrayList<Pins> pin;
@@ -120,7 +121,7 @@ public class CollisionPhysics {
                 Vector3 pos = new Vector3();
                 pin.get(created).pinscene.modelInstance.transform.getTranslation(pos);
 
-                btRigidBody pinBody = createDynamicBody(pinShape, pos, 1f);
+                btRigidBody pinBody = createDynamicBody(pinShape, pos, 0.1f);
 
                 world.addRigidBody(pinBody);
                 pinBodies.add(pinBody);
@@ -146,6 +147,9 @@ public class CollisionPhysics {
         btRigidBody.btRigidBodyConstructionInfo info =
                 new btRigidBody.btRigidBodyConstructionInfo(0f, motion, shape, Vector3.Zero);
 
+        motionStates.add(motion);
+        constructionInfos.add(info);
+
         return new btRigidBody(info);
     }
 
@@ -156,6 +160,9 @@ public class CollisionPhysics {
 
         btRigidBody.btRigidBodyConstructionInfo info =
                 new btRigidBody.btRigidBodyConstructionInfo(0f, motion, shape, Vector3.Zero);
+
+        motionStates.add(motion);
+        constructionInfos.add(info);
 
         return new btRigidBody(info);
     }
@@ -182,12 +189,15 @@ public class CollisionPhysics {
         btRigidBody.btRigidBodyConstructionInfo info = new btRigidBody.btRigidBodyConstructionInfo(mass, motion, shape, inertia);
         
 
+        motionStates.add(motion);
+        constructionInfos.add(info);
+
         return new btRigidBody(info);
     }
 
     public void update(float delta) {
          
-        world.stepSimulation(delta, 1, 1f / 60f);
+        world.stepSimulation(delta, 5, 1f / 60f);
         // Ball sync
         ballBody.getWorldTransform(ball.ballScene.modelInstance.transform);
         Matrix4 temp = new Matrix4();
@@ -251,30 +261,52 @@ public class CollisionPhysics {
 
     public void dispose() {
 
-        for (btRigidBody pin : pinBodies) {
-            pin.dispose();
-        }
+    for (btRigidBody pin : pinBodies) {
+        world.removeRigidBody(pin);
+        pin.dispose();
+    }
 
-        pinBodies.clear();
+    pinBodies.clear();
 
-        ballBody.dispose();
+    world.removeRigidBody(ballBody);
+    ballBody.dispose();
 
-        laneBody.dispose();
-        leftGutterBody.dispose();
-        rightGutterBody.dispose();
-        leftGutterSidewallBody.dispose();
-        rightGutterSidewallBody.dispose();
+    world.removeRigidBody(laneBody);
+    laneBody.dispose();
 
+    world.removeRigidBody(leftGutterBody);
+    leftGutterBody.dispose();
 
-        config.dispose();
-        dispatcher.dispose();
-        broadphase.dispose();
-        solver.dispose();
-        laneShape.dispose();
-        gutterShape.dispose();
-        ballShape.dispose();
-        pinShape.dispose();
+    world.removeRigidBody(rightGutterBody);
+    rightGutterBody.dispose();
 
-        world.dispose();
+    world.removeRigidBody(leftGutterSidewallBody);
+    leftGutterSidewallBody.dispose();
+
+    world.removeRigidBody(rightGutterSidewallBody);
+    rightGutterSidewallBody.dispose();
+
+    for(btRigidBodyConstructionInfo info : constructionInfos){
+        info.dispose();
+    }
+
+    for(btDefaultMotionState motion : motionStates){
+        motion.dispose();
+    }
+
+    constructionInfos.clear();
+    motionStates.clear();
+
+    laneShape.dispose();
+    gutterShape.dispose();
+    ballShape.dispose();
+    pinShape.dispose();
+
+    world.dispose();
+
+    solver.dispose();
+    broadphase.dispose();
+    dispatcher.dispose();
+    config.dispose();
     }
 }

@@ -5,13 +5,12 @@ import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.collision.Collision;
 
 public class EventHandler {
     
@@ -50,7 +49,7 @@ public class EventHandler {
         handlemousePhysics(5f);
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !inputblocked){
             inputblocked = true;
-           collisionDetector.shootBall(new Vector3(0f,0f, 120f));
+           collisionDetector.shootBall(new Vector3(0f,0f, 150f));
            thrown = true;
             collisionDetector.getBallBody().getWorldTransform().getTranslation(pos);  
         }
@@ -171,7 +170,7 @@ public void resetpins() {
     for (int i = 0; i < pininitposition.size(); i++) {
 
         btRigidBody body = collisionDetector.getPinBodies().get(i);
-
+        //body.setActivationState(Collision.ACTIVE_TAG);
         Matrix4 transform = new Matrix4();
 
         transform.set(
@@ -201,15 +200,18 @@ public void resetpins() {
 
         int pinsdown = 0;
 
-        float tolerance = 0.01f;
+        float tolerance = 0.19f;
         for(int i = 0 ; i < pininitposition.size() ; i++){
             
             Quaternion a = collisionDetector.getpinbodyrotation(i);
             Quaternion b = pin.get(i).getpinrotation();
             if(!quaternionsEqual(a,b,tolerance)){
                 pinsdown++;
+                Matrix4 transform = new Matrix4().setToTranslation(100f,100f,100f);
+                collisionDetector.getPinBodies().get(i).setWorldTransform(transform);
             }
         }
         return pinsdown;
     }
+
 }

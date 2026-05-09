@@ -45,9 +45,9 @@ public class Player1 extends Player{
 
         //To prevent arrayindexoutofboundeception
         int scoredisplayturn = turn;   
-
         if(scoredisplayturn > 9)
             scoredisplayturn = 9;
+
         scoreDisplay.setScoreUI(scoredisplayturn, score.getsubturnscore(scoredisplayturn) , scoredisplayturn, String.valueOf(score.getFrameScore(scoredisplayturn)));
         scoreDisplay.setTotalScore(String.valueOf(score.getTotalScore()));
         scoreDisplay.setpreviousUI(score.getScoreArray());

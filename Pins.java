@@ -1,11 +1,10 @@
 package com.BowlORama;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
-import net.mgsx.gltf.loaders.glb.GLBLoader;
+
 import net.mgsx.gltf.scene3d.scene.*;
 
 

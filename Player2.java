@@ -43,7 +43,7 @@ public class Player2 extends Player{
         // scoreDisplay.setScoreUI(currentTurn, score.getsubturnscore(currentTurn) ,currentTurn, String.valueOf(score.getFrameScore(currentTurn)));
         // scoreDisplay.setTotalScore(String.valueOf(score.getTotalScore()));
 
-int scoredisplayturn = turn;   
+    int scoredisplayturn = turn;   
 
         if(scoredisplayturn > 9)
             scoredisplayturn = 9;

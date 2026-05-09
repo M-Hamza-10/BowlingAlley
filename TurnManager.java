@@ -7,16 +7,29 @@ public class TurnManager {
     private Player currentPlayer;
     private EventHandler turnhandler;
     private int tempturn = 0;
+    private Main game;
+    private GameScreen gameScreen;
   
-    public TurnManager(EventHandler turnHandler){
+    public TurnManager(EventHandler turnHandler , Main game , GameScreen gameScreen){
         this.turnhandler = turnHandler;
-       player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1));
-       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2));
+        this.game = game;
+        this.gameScreen = gameScreen;
+       player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1 , game , gameScreen , "Aslam"));
+       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2 , game , gameScreen , "Bilal"));
        setturn(player1);
     }
 
     public void setturn(Player player){
         currentPlayer = player;
+        if(currentPlayer instanceof Player1){
+            currentPlayer.scoreDisplay.setPlayerLabel("Aslam's Turn");
+            player2.scoreDisplay.setPlayerLabel("Bilal");
+        }
+        else{
+            currentPlayer.scoreDisplay.setPlayerLabel("Bilal's Turn");
+            player1.scoreDisplay.setPlayerLabel("Aslam");
+        }
+
         tempturn = currentPlayer.getturn();
     }
 
@@ -26,6 +39,7 @@ public class TurnManager {
     }
 
     public void manageturn(float dt){
+
         if(turnhandler.turnended){
             setscore();
             currentPlayer.update();
@@ -37,27 +51,53 @@ public class TurnManager {
                 setturn(player2);
             else
                 setturn(player1);
-            } else if (currentPlayer.getsubturn() == 1) {
+        } 
+        else if(currentPlayer.getturn() == 9 && (currentPlayer.score.getscorearray()[9][0].equals("X") || currentPlayer.score.getscorearray()[9][1].equals("X"))){
                 turnhandler.reset(dt);
-            }
-            else if(currentPlayer.getsubturn() >= 3){
+                turnhandler.resetpins();
+        }
+        else if(currentPlayer.getsubturn() == 2){
+            turnhandler.reset(dt);
+            turnhandler.resetpins();
+        }
+        else if (currentPlayer.getsubturn() == 1) {
+                turnhandler.reset(dt);
+        }
+        else if(currentPlayer.getsubturn() >= 3){
                 turnhandler.reset(dt);
                 turnhandler.resetpins();
                 if (currentPlayer instanceof Player1)
                     setturn(player2);
                 else
                     setturn(player1);
-            }
+        }
             turnhandler.turnended = false;
         }
     }
 
+    public void isFinished(){
+        if(player1.score.isFinished() && player2.score.isFinished()){
+            if(player1.score.getTotalScore() > player2.score.getTotalScore()){
+                game.setScreen(new PauseMenu(game, gameScreen , "Player 1 WINS!" ,true));
+                // gameScreen.dispose();
+            }
+            else if(player1.score.getTotalScore() < player2.score.getTotalScore()){
+                game.setScreen(new PauseMenu(game, gameScreen , "PLAYER 2 WINS!" , true));
+                // gameScreen.dispose();
+            }
+            else{
+                game.setScreen(new PauseMenu(game, gameScreen , "DRAW" , true));
+                // gameScreen.dispose();
+            }
+        }
+    }
     public void render(float dt){
 
         player1.render(dt);
         player1.update();
         player2.render(dt);
         player2.update();
+        isFinished();
     }
 
 }
