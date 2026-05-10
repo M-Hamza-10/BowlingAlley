@@ -1,11 +1,10 @@
 package com.BowlORama;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 
-import net.mgsx.gltf.loaders.glb.GLBLoader;
+
 import net.mgsx.gltf.scene3d.scene.*;
 
 
@@ -18,6 +17,7 @@ public class Pins {
     Map map;
     Quaternion startrotaion;
     int pincolumn = 0;
+    boolean hit = false;
 
       public Pins(SceneManager sceneManager , PerspectiveCamera camera , Map map , SceneAsset pin){
         this.map = map;
@@ -95,6 +95,7 @@ public class Pins {
 
       public void dispose(){
         pin.dispose();
+        
       }
 
 }

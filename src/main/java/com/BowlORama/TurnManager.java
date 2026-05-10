@@ -7,16 +7,29 @@ public class TurnManager {
     private Player currentPlayer;
     private EventHandler turnhandler;
     private int tempturn = 0;
+    private Main game;
+    private GameScreen gameScreen;
   
-    public TurnManager(EventHandler turnHandler){
+    public TurnManager(EventHandler turnHandler , Main game , GameScreen gameScreen){
         this.turnhandler = turnHandler;
-       player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1));
-       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2));
+        this.game = game;
+        this.gameScreen = gameScreen;
+       player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1 , game , gameScreen , "Aslam"));
+       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2 , game , gameScreen , "Bilal"));
        setturn(player1);
     }
 
     public void setturn(Player player){
         currentPlayer = player;
+        if(currentPlayer instanceof Player1){
+            currentPlayer.scoreDisplay.setPlayerLabel("Aslam's Turn");
+            player2.scoreDisplay.setPlayerLabel("Bilal");
+        }
+        else{
+            currentPlayer.scoreDisplay.setPlayerLabel("Bilal's Turn");
+            player1.scoreDisplay.setPlayerLabel("Aslam");
+        }
+
         tempturn = currentPlayer.getturn();
     }
 
@@ -64,8 +77,18 @@ public class TurnManager {
 
     public void isFinished(){
         if(player1.score.isFinished() && player2.score.isFinished()){
+            gameScreen.bgMusic.stop();
             if(player1.score.getTotalScore() > player2.score.getTotalScore()){
-
+                game.setScreen(new PauseMenu(game, gameScreen , "Player 1 WINS!" ,true));
+                // gameScreen.dispose();
+            }
+            else if(player1.score.getTotalScore() < player2.score.getTotalScore()){
+                game.setScreen(new PauseMenu(game, gameScreen , "PLAYER 2 WINS!" , true));
+                // gameScreen.dispose();
+            }
+            else{
+                game.setScreen(new PauseMenu(game, gameScreen , "DRAW" , true));
+                // gameScreen.dispose();
             }
         }
     }
@@ -75,6 +98,7 @@ public class TurnManager {
         player1.update();
         player2.render(dt);
         player2.update();
+        isFinished();
     }
 
 }

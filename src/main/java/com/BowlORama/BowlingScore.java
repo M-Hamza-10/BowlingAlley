@@ -5,7 +5,7 @@ public class BowlingScore {
     private String[][] scores = new String[10][3];
 
     //Change turn in player.java also 
-    private int turn = 6; 
+    private int turn = 0; 
     private int subturn = 0;
 
     // each frame score

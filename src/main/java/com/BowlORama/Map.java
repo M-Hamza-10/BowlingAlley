@@ -1,45 +1,25 @@
 package com.BowlORama;
 
-import com.badlogic.gdx.ApplicationAdapter;
+import java.util.ArrayList;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.scene.Scene;
 import net.mgsx.gltf.scene3d.scene.SceneManager;
 import net.mgsx.gltf.loaders.glb.GLBLoader;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+
 public class Map {
 
     PerspectiveCamera camera;
@@ -57,17 +37,29 @@ public class Map {
     ModelBuilder modelBuilder;
 
     Model path, backBoard, externalpath;
-    Texture texture, texture2, backboard2texture;
+    Model sidewallmodel , ceilmodel;
+    Model lightStrip;
+    Texture texture, texture2, backboard2texture , wallTexture;
+    Texture ceilingTexture;
     Material material, material2;
+    Material wallmaterial , ceilingmaterial;
+    Material lightMaterial;
 
     ModelInstance pathinstance, externalpathinstance;
     ModelInstance backBoardinstance, backBoardInstance2, backBoardInstance3;
     ModelInstance sideWall, sideWall2;
+    ModelInstance ceiling;
+    ModelInstance leftLight;
+    ModelInstance rightLight;
+    
 
+    ArrayList<Scene> lightScenes = new ArrayList<>();
     Scene pathscene, gutterscene, gutter2scene;
     Scene externalpathscene;
     Scene backBoardScene, backBoardScene2, backBoardScene3;
     Scene sideWallscene, sideWallscene2;
+    Scene ceilScene;
+
 
     SceneAsset gutterAsset;
 
@@ -83,6 +75,8 @@ public class Map {
         initExternalPath();
         initBackBoards();
         initSideWalls();
+        initCeiling();
+        initLights();
 
         addScenes();
     }
@@ -92,9 +86,15 @@ private void initTextures(){
     texture = new Texture(Gdx.files.internal("pathtexture.png"));
     texture2 = new Texture(Gdx.files.internal("externalpathtexture.png"));
     backboard2texture = new Texture(Gdx.files.internal("pathtexture.png"));
+    wallTexture = new Texture(Gdx.files.internal("walltexture.png"));
+    ceilingTexture = new Texture(Gdx.files.internal("ceilingTexture.png"));
 
     material = new Material(PBRTextureAttribute.createBaseColorTexture(texture));
     material2 = new Material(PBRTextureAttribute.createBaseColorTexture(texture2));
+    wallmaterial = new Material(PBRTextureAttribute.createBaseColorTexture(wallTexture));
+    ceilingmaterial = new Material(PBRTextureAttribute.createBaseColorTexture(ceilingTexture));
+    lightMaterial = new Material(ColorAttribute.createEmissive(Color.WHITE));
+    
 }
 
 private void initModels(){
@@ -106,7 +106,7 @@ private void initModels(){
             VertexAttributes.Usage.TextureCoordinates);
 
     externalpath = modelBuilder.createBox(pathwidth + 80f, pathheight, pathdepth + 70f,
-            material2,
+            wallmaterial,
             VertexAttributes.Usage.Position |
             VertexAttributes.Usage.Normal |
             VertexAttributes.Usage.TextureCoordinates);
@@ -116,6 +116,78 @@ private void initModels(){
             VertexAttributes.Usage.Position |
             VertexAttributes.Usage.Normal |
             VertexAttributes.Usage.TextureCoordinates);
+
+            
+    sidewallmodel = modelBuilder.createBox(pathwidth + 80, pathheight + 30, 1f,
+            wallmaterial,
+            VertexAttributes.Usage.Position |
+            VertexAttributes.Usage.Normal |
+            VertexAttributes.Usage.TextureCoordinates);
+
+            ceilmodel = modelBuilder.createRect(
+
+                -75f, 0f, -75f,
+                75f, 0f, -75f,
+                75f, 0f,  75f,
+                -75f, 0f,  75f,
+
+                0, -1, 0,
+
+                ceilingmaterial,
+
+                VertexAttributes.Usage.Position |
+                VertexAttributes.Usage.Normal |
+                VertexAttributes.Usage.TextureCoordinates
+        );
+        lightStrip = modelBuilder.createBox(
+                1f,      // thickness
+                0.2f,    // height
+                80f,     // length
+
+                lightMaterial,
+
+                VertexAttributes.Usage.Position |
+                VertexAttributes.Usage.Normal
+        );
+}
+
+private void initLights(){
+
+        ModelInstance strip = new ModelInstance(lightStrip);
+        Scene stripScene = new Scene(strip);
+
+        strip.transform.rotate(Vector3.Z,90);
+        stripScene.modelInstance.transform.setToTranslation(
+                55f,
+                0f,
+                0f
+        );
+        lightScenes.add(stripScene);
+
+        ModelInstance strip2 = new ModelInstance(lightStrip);
+        Scene stripScene2 = new Scene(strip2);
+        strip2.transform.rotate(Vector3.Z,90);
+        stripScene2.modelInstance.transform.setToTranslation(
+                -55f,
+                -1f,
+                0f
+        );
+        lightScenes.add(stripScene2);
+
+    for(int i = -3; i <= 3; i++){
+
+        ModelInstance strip3 = new ModelInstance(lightStrip);
+
+        Scene stripScene3 = new Scene(strip3);
+
+        stripScene3.modelInstance.transform.setToTranslation(
+                i * 12f,
+                19f,
+                0f
+        );
+
+        lightScenes.add(stripScene3);
+    }
 }
 
 private void initPath(){
@@ -165,7 +237,7 @@ private void initExternalPath(){
     externalpathinstance = new ModelInstance(externalpath);
     externalpathscene = new Scene(externalpathinstance);
 
-    externalpathscene.modelInstance.transform.setToTranslation((pathwidth/2)+3,pathheight-1,-((pathdepth/2)-5));
+    externalpathscene.modelInstance.transform.setToTranslation((pathwidth/2)+3,pathheight-2f,-((pathdepth/2)-5));
 }
 
 private void initBackBoards(){
@@ -190,8 +262,8 @@ private void initBackBoards(){
 
 private void initSideWalls(){
 
-    sideWall = new ModelInstance(backBoard);
-    sideWall2 = new ModelInstance(backBoard);
+    sideWall = new ModelInstance(sidewallmodel);
+    sideWall2 = new ModelInstance(sidewallmodel);
 
     sideWallscene = new Scene(sideWall);
     sideWallscene.modelInstance.transform.setToTranslation((pathdepth/1.6f),0,0);
@@ -200,6 +272,13 @@ private void initSideWalls(){
     sideWallscene2 = new Scene(sideWall2);
     sideWallscene2.modelInstance.transform.setToTranslation(-(pathdepth/1.6f),0,0);
     sideWallscene2.modelInstance.transform.rotate(Vector3.Y,90);
+}
+
+private void initCeiling(){
+    ceiling = new ModelInstance(ceilmodel);
+    ceilScene = new Scene(ceiling);
+    ceilScene.modelInstance.transform.setToTranslation(0f,20f,0f);
+    //ceilScene.modelInstance.transform.rotate(Vector3.X,270);
 }
 
 private void addScenes(){
@@ -213,6 +292,10 @@ private void addScenes(){
     sceneManager.addScene(backBoardScene3);
     sceneManager.addScene(sideWallscene);
     sceneManager.addScene(sideWallscene2);
+    sceneManager.addScene(ceilScene);
+    for(Scene s : lightScenes){
+        sceneManager.addScene(s);
+    }
 }
 
 public float getpathheight(){
@@ -228,8 +311,46 @@ public float getpathdepth(){
 }
 
 public void dispose(){
-    path.dispose();;
-    gutterAsset.dispose();
-    backBoard.dispose();
+
+    // Models
+    if(path != null)
+        path.dispose();
+
+    if(externalpath != null)
+        externalpath.dispose();
+
+    if(backBoard != null)
+        backBoard.dispose();
+
+    if(sidewallmodel != null)
+        sidewallmodel.dispose();
+
+    if(ceilmodel != null)
+        ceilmodel.dispose();
+
+    if(lightStrip != null)
+        lightStrip.dispose();
+
+
+    // Textures
+    if(texture != null)
+        texture.dispose();
+
+    if(texture2 != null)
+        texture2.dispose();
+
+    if(backboard2texture != null)
+        backboard2texture.dispose();
+
+    if(wallTexture != null)
+        wallTexture.dispose();
+
+    if(ceilingTexture != null)
+        ceilingTexture.dispose();
+
+
+    // GLTF Assets
+    if(gutterAsset != null)
+        gutterAsset.dispose();
 }
 }

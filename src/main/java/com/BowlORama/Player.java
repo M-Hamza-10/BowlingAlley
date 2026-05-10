@@ -1,13 +1,12 @@
 package com.BowlORama;
 
-import java.util.ArrayList;
 
 abstract public class Player {
 
     String name;
     BowlingScore score;
     Scorecardgraphics scoreDisplay;
-    protected int turn = 6;
+    protected int turn = 0;
     protected int subturn;
     
 

@@ -13,11 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 
 public class MainMenu extends ScreenAdapter {
 
@@ -34,6 +35,11 @@ public class MainMenu extends ScreenAdapter {
     private Texture quitTex;
     private Main game;
 
+    private Music bgMusic;
+
+    private Sound btnhitSound;
+    private Sound btnclickSound;
+
     // Glow animation
     private float glowTime = 0f;
 
@@ -46,7 +52,9 @@ public class MainMenu extends ScreenAdapter {
 
         batch = new SpriteBatch();
         stage = new Stage(new ScreenViewport());
+        loadAudio();
 
+        //Used for handling Mouse Inputs and events
         Gdx.input.setInputProcessor(stage);
 
         // Load textures
@@ -74,6 +82,8 @@ public class MainMenu extends ScreenAdapter {
         playBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 game.play();
+                btnclickSound.play();
+                bgMusic.stop();
             }
         });
 
@@ -81,25 +91,46 @@ public class MainMenu extends ScreenAdapter {
         scoreBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Scores");
+                btnclickSound.play();
             }
         });
 
         settingsBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Settings");
+                btnclickSound.play();
             }
         });
 
         quitBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.exit();
+                btnclickSound.play();
             }
         });
+
+        bgMusic.setLooping(true);
+        bgMusic.setVolume(0.1f);
+        bgMusic.play();
 
         stage.addActor(playBtn);
         stage.addActor(scoreBtn);
         stage.addActor(settingsBtn);
         stage.addActor(quitBtn);
+    }
+
+    public void loadAudio(){
+        bgMusic = Gdx.audio.newMusic(
+        Gdx.files.internal("sound/bgMenumusic.mp3")
+    );
+
+    btnhitSound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/select.wav")
+    );
+
+    btnclickSound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/menu-click.wav")
+    );
     }
 private ImageButton createButton(Texture tex, float delay) {
 
@@ -125,6 +156,7 @@ private ImageButton createButton(Texture tex, float delay) {
             button.addAction(
                 Actions.scaleTo(1.12f, 1.12f, 0.15f , Interpolation.swingOut)
             );
+            btnhitSound.play();
         }
 
         @Override
@@ -189,5 +221,8 @@ private ImageButton createButton(Texture tex, float delay) {
         scoreTex.dispose();
         settingsTex.dispose();
         quitTex.dispose();
+        bgMusic.dispose();
+        btnhitSound.dispose();
+        btnclickSound.dispose();
     }
 }
