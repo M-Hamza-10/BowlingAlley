@@ -1,0 +1,260 @@
+package com.BowlORama;
+public class BowlingScore {
+
+    // frame scores
+    private String[][] scores = new String[10][3];
+
+    //Change turn in player.java also 
+    private int turn = 0; 
+    private int subturn = 0;
+
+    // each frame score
+    private int[] TurnTotalScore = new int[10];
+
+    // final cumulative score
+    private int TotalScore = 0;
+
+    public BowlingScore() {
+        initturnscore();
+    }
+
+
+    private void initturnscore(){
+        for(int i = 0 ; i < 10 ; i++ ){
+            TurnTotalScore[i] = -1;
+        }
+    }
+
+    // add score
+    public int setscore(int score2) {
+
+        if(turn >= 10)
+            return -1;
+
+        if (score2 < 0 || score2 > 10) 
+            return -1; // invalid
+    
+        
+        String score = String.valueOf(score2);
+        if(score2 == 10)
+            score = "X";
+
+        if(subturn == 1){
+                if(turn == 9 && scores[9][0].equals("X"))
+                    scores[turn][subturn] = score;
+        else {
+
+            int previous = getValue(scores[turn][subturn - 1] , 0);
+
+            int currentPins = score2 - previous;
+
+            // SPARE
+            if(previous + currentPins == 10)
+                scores[turn][subturn] = "/";
+
+            else
+                scores[turn][subturn] =
+                    String.valueOf(currentPins);
+        }
+        }
+        else
+            scores[turn][subturn] = score;
+
+        settotalscore();
+
+        // strike in frames 1 to 9
+        if (score.equals("X") && turn < 9 && subturn == 0) {
+            subturn = 0;
+            turn++;
+            return 0;
+        }
+
+        // normal movement
+        subturn++;
+
+        // frame completed
+        if (turn < 9 && subturn >= 2) {
+            subturn = 0;
+            turn++;
+        }
+
+
+        if (turn == 9) {
+
+            if (subturn == 2) {
+
+                int first = getValue(scores[9][0] , 0);
+                int second = getValue(scores[9][1] , getValue(scores[9][0] , 0));
+
+                if (first + second < 10 && first != 10) {
+                    turn++;
+                    subturn = 0;
+                }
+            }
+
+            else if (subturn >= 3) {
+                turn++;
+                subturn = 0;
+            }
+        }
+
+        return 1;
+    }
+
+    public void settotalscore() {
+
+
+        for (int i = 0; i < 10; i++) {
+
+            if (scores[i][0] == null)
+                continue;
+
+            int tempscore1 = getValue(scores[i][0] , 0);
+            int tempscore2 = (scores[i][1] != null) ? getValue(scores[i][1] , getValue(scores[9][0] , 0)) : 0;
+
+
+            if (i == 9) {
+
+                // Sum whatever is available without breaking the loop
+                int ball1 = getValue(scores[9][0] , 0);
+                int ball2 = getValue(scores[9][1] , getValue(scores[9][0], 0));
+                int ball3 = getValue(scores[9][2] , getValue(scores[9][1], getValue(scores[9][0], 0)));
+                
+                TurnTotalScore[9] = ball1 + ball2 + ball3;
+                continue; 
+            }
+
+            int tempscore3 = nextBall(i, 1);
+            int tempscore4 = nextBall(i, 2);
+
+            // strike
+            if (scores[i][0].equals("X")) {
+                if (tempscore3 == -1 || tempscore4 == -1)
+                    continue;
+
+                TurnTotalScore[i] = 10 + tempscore3 + tempscore4;
+            }
+
+            //Spare
+            else if (scores[i][1] != null && !scores[i][1].isEmpty()) {
+                if (scores[i][1] != null && scores[i][1].equals("/")) { // Spare
+                    if (tempscore3 == -1) 
+                        continue;
+                    TurnTotalScore[i] = 10 + tempscore3;
+                } else { // Open Frame
+                    TurnTotalScore[i] = tempscore1 + tempscore2;
+                }
+            }
+
+            // open frame
+            else if (scores[i][1] != null) {
+                TurnTotalScore[i] = tempscore1 + tempscore2;
+            }
+        }
+        calculatetotalscore();
+
+    }
+    private void calculatetotalscore(){
+                
+        TotalScore = 0;
+        for (int i = 0; i < 10; i++) {
+            if (TurnTotalScore[i] != -1)
+                TotalScore += TurnTotalScore[i];
+            else if(scores[i][0] != null && !scores[i][0].isEmpty()){
+                if(scores[i][1] != null && !scores[i][1].isEmpty() && scores[i][2] != null && !scores[i][2].isEmpty()){
+                    TotalScore += (getValue(scores[i][0] , 0) + getValue(scores[i][1], getValue(scores[i][0], 0) )) + getValue(scores[i][2] , getValue(scores[i][2] ,getValue(scores[i][1] , getValue(scores[i][0], 0))));
+                }
+                else if(scores[i][1] != null && !scores[i][1].isEmpty())
+                    TotalScore += (getValue(scores[i][0] , 0) + getValue(scores[i][1] , getValue(scores[i][0] , 0)));
+                else{
+                    TotalScore += getValue(scores[i][0] , 0);
+                }
+            }
+        }
+    }
+
+    // get next balls after strike/spare
+    private int nextBall(int frame, int number) {
+
+        int count = 0;
+
+        for (int i = frame + 1; i < 10; i++) {
+            for (int j = 0; j < 3; j++) {
+
+                if (scores[i][j] != null  && !scores[i][j].isEmpty()) {
+                    count++;
+
+                    if (count == number)
+                        return getValue(scores[i][j] , 0);
+                }
+            }
+        }
+
+        return -1;   
+    }
+
+    // convert score string to int
+private int getValue(String s, int previous) {
+
+    if(s == null || s.isEmpty())
+        return 0;
+
+    if(s.equals("X"))
+        return 10;
+
+    // SPARE
+    if(s.equals("/"))
+        return 10 - previous;
+
+    try {
+
+        return Integer.parseInt(s);
+
+    } catch(NumberFormatException e) {
+
+        return 0;
+    }
+}
+
+    public int getTotalScore() {
+        return TotalScore;
+    }
+
+    public int getFrameScore(int frame) {
+        return TurnTotalScore[frame];
+    }
+
+    public int[] getScoreArray(){
+        return TurnTotalScore.clone();
+    }
+    public String getsubturnscore(int turn){
+        if(scores[turn][0] == null) 
+            scores[turn][0] = "";
+        if(scores[turn][1] == null) 
+            scores[turn][1] = "";
+        if(scores[turn][2] == null )
+            scores[turn][2] = "";
+
+        return scores[turn][0] + " " + scores[turn][1] + " "  + scores[turn][2];
+    }
+
+    public String[][] getscorearray(){
+        return scores.clone();
+    }
+
+    public String getRoll(int frame, int ball) {
+        return scores[frame][ball];
+    }
+
+    public int getturn() {
+        return turn;
+    }
+
+    public int getsubturn() {
+        return subturn;
+    }
+
+    public boolean isFinished() {
+        return turn > 9;
+    }
+}
