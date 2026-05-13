@@ -2,6 +2,8 @@ package com.BowlORama;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -27,6 +29,9 @@ public class GameScreen implements Screen{
     //private Scorecardgraphics scorecardgraphics;
     private Main game;
     private boolean initialized;
+    public String player1Name;
+    public String player2Name;
+    public Music bgMusic;
     
 
     //classes initializtion
@@ -43,6 +48,8 @@ public class GameScreen implements Screen{
         //NUll pointer Exception occurs bcz it first initalizes the map then gamescreen so screenmanager uninitialized
         // map = new Map(camera, sceneManager);
         //Do not add heavy objects here like camera
+        
+
     }
 
     @Override
@@ -65,14 +72,27 @@ public class GameScreen implements Screen{
     }
 
 
+    
+
+    private void loadSound(){
+        bgMusic = Gdx.audio.newMusic(Gdx.files.internal("sound/bgMenumusic2.mp3"));
+    }
+    
     @Override
     public void show() {
+        
         if(initialized)
             return;
+
+        loadSound();
+        bgMusic.play();
+        bgMusic.setLooping(true);
+        bgMusic.setVolume(0.1f);
         sceneManager = new SceneManager();
         camera = new PerspectiveCamera(67,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         map = new Map(camera, sceneManager);
         pinasset = new GLBLoader().load(Gdx.files.internal("pin.glb"));
+
         
         
         // called once when screen starts  like create
@@ -114,11 +134,16 @@ public class GameScreen implements Screen{
         temppins.add(pos);
         }
 
+        
+        player1Name = PlayerNameScreen.PLAYER1_NAME;
+        player2Name = PlayerNameScreen.PLAYER2_NAME;
+
         collisondetector = new CollisionPhysics(map, pin, ball);
         eventHandler = new EventHandler(ball, collisondetector , camera , map , temppins , pin);
         turnManager = new TurnManager(eventHandler ,game , this);
         initialized = true;
         //System.out.println("Show ");
+
     }
 
 
@@ -146,7 +171,9 @@ public class GameScreen implements Screen{
     public void dispose(){
         sceneManager.dispose();//Does not dispose objects automatically manually dispose models in each class 
         map.dispose();
+        bgMusic.dispose();
     }
-
-
 }
+
+
+

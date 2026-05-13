@@ -17,6 +17,7 @@ public class Pins {
     Map map;
     Quaternion startrotaion;
     int pincolumn = 0;
+    boolean hit = false;
 
       public Pins(SceneManager sceneManager , PerspectiveCamera camera , Map map , SceneAsset pin){
         this.map = map;
@@ -94,6 +95,7 @@ public class Pins {
 
       public void dispose(){
         pin.dispose();
+        
       }
 
 }

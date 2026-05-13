@@ -5,7 +5,7 @@ public class BowlingScore {
     private String[][] scores = new String[10][3];
 
     //Change turn in player.java also 
-    private int turn = 9; 
+    private int turn = 0; 
     private int subturn = 0;
 
     // each frame score
@@ -42,11 +42,20 @@ public class BowlingScore {
         if(subturn == 1){
                 if(turn == 9 && scores[9][0].equals("X"))
                     scores[turn][subturn] = score;
-                else if(turn == 9 && !scores[9][1].equals("X")){
-                    scores[turn][subturn] = scores[turn][subturn] = String.valueOf(score2 - getValue(scores[turn][subturn-1]));
-                }
-                else
-                    scores[turn][subturn] = String.valueOf(score2 - getValue(scores[turn][subturn-1]));
+        else {
+
+            int previous = getValue(scores[turn][subturn - 1] , 0);
+
+            int currentPins = score2 - previous;
+
+            // SPARE
+            if(previous + currentPins == 10)
+                scores[turn][subturn] = "/";
+
+            else
+                scores[turn][subturn] =
+                    String.valueOf(currentPins);
+        }
         }
         else
             scores[turn][subturn] = score;
@@ -74,8 +83,8 @@ public class BowlingScore {
 
             if (subturn == 2) {
 
-                int first = getValue(scores[9][0]);
-                int second = getValue(scores[9][1]);
+                int first = getValue(scores[9][0] , 0);
+                int second = getValue(scores[9][1] , getValue(scores[9][0] , 0));
 
                 if (first + second < 10 && first != 10) {
                     turn++;
@@ -100,16 +109,16 @@ public class BowlingScore {
             if (scores[i][0] == null)
                 continue;
 
-            int tempscore1 = getValue(scores[i][0]);
-            int tempscore2 = (scores[i][1] != null) ? getValue(scores[i][1]) : 0;
+            int tempscore1 = getValue(scores[i][0] , 0);
+            int tempscore2 = (scores[i][1] != null) ? getValue(scores[i][1] , getValue(scores[9][0] , 0)) : 0;
 
 
             if (i == 9) {
 
                 // Sum whatever is available without breaking the loop
-                int ball1 = getValue(scores[9][0]);
-                int ball2 = getValue(scores[9][1]);
-                int ball3 = getValue(scores[9][2]);
+                int ball1 = getValue(scores[9][0] , 0);
+                int ball2 = getValue(scores[9][1] , getValue(scores[9][0], 0));
+                int ball3 = getValue(scores[9][2] , getValue(scores[9][1], getValue(scores[9][0], 0)));
                 
                 TurnTotalScore[9] = ball1 + ball2 + ball3;
                 continue; 
@@ -128,7 +137,7 @@ public class BowlingScore {
 
             //Spare
             else if (scores[i][1] != null && !scores[i][1].isEmpty()) {
-                if (tempscore1 + tempscore2 == 10) { // Spare
+                if (scores[i][1] != null && scores[i][1].equals("/")) { // Spare
                     if (tempscore3 == -1) 
                         continue;
                     TurnTotalScore[i] = 10 + tempscore3;
@@ -153,12 +162,12 @@ public class BowlingScore {
                 TotalScore += TurnTotalScore[i];
             else if(scores[i][0] != null && !scores[i][0].isEmpty()){
                 if(scores[i][1] != null && !scores[i][1].isEmpty() && scores[i][2] != null && !scores[i][2].isEmpty()){
-                    TotalScore += (getValue(scores[i][0]) + getValue(scores[i][1])) + getValue(scores[i][2]);
+                    TotalScore += (getValue(scores[i][0] , 0) + getValue(scores[i][1], getValue(scores[i][0], 0) )) + getValue(scores[i][2] , getValue(scores[i][2] ,getValue(scores[i][1] , getValue(scores[i][0], 0))));
                 }
                 else if(scores[i][1] != null && !scores[i][1].isEmpty())
-                    TotalScore += (getValue(scores[i][0]) + getValue(scores[i][1]));
+                    TotalScore += (getValue(scores[i][0] , 0) + getValue(scores[i][1] , getValue(scores[i][0] , 0)));
                 else{
-                    TotalScore += getValue(scores[i][0]);
+                    TotalScore += getValue(scores[i][0] , 0);
                 }
             }
         }
@@ -176,7 +185,7 @@ public class BowlingScore {
                     count++;
 
                     if (count == number)
-                        return getValue(scores[i][j]);
+                        return getValue(scores[i][j] , 0);
                 }
             }
         }
@@ -185,23 +194,27 @@ public class BowlingScore {
     }
 
     // convert score string to int
-    private int getValue(String s) {
+private int getValue(String s, int previous) {
 
-       
-        if (s == null || s.isEmpty()) {
-            return 0;
-        }
+    if(s == null || s.isEmpty())
+        return 0;
 
-        if (s.equals("X"))
-            return 10;
+    if(s.equals("X"))
+        return 10;
 
-        try {
+    // SPARE
+    if(s.equals("/"))
+        return 10 - previous;
+
+    try {
+
         return Integer.parseInt(s);
-        } 
-        catch (NumberFormatException e) {
-        return 0; 
-        }
+
+    } catch(NumberFormatException e) {
+
+        return 0;
     }
+}
 
     public int getTotalScore() {
         return TotalScore;

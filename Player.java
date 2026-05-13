@@ -6,7 +6,7 @@ abstract public class Player {
     String name;
     BowlingScore score;
     Scorecardgraphics scoreDisplay;
-    protected int turn = 9;
+    protected int turn = 0;
     protected int subturn;
     
 

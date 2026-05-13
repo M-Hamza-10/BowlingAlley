@@ -81,7 +81,7 @@ public class MainMenu extends ScreenAdapter {
         // Click actions
         playBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                game.play();
+                game.setScreen(new PlayerNameScreen(game));
                 btnclickSound.play();
                 bgMusic.stop();
             }
@@ -90,8 +90,8 @@ public class MainMenu extends ScreenAdapter {
 
         scoreBtn.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Scores");
                 btnclickSound.play();
+                game.setScreen(new HighScoreScreen(game));
             }
         });
 
@@ -110,7 +110,7 @@ public class MainMenu extends ScreenAdapter {
         });
 
         bgMusic.setLooping(true);
-        bgMusic.setVolume(0.5f);
+        bgMusic.setVolume(0.1f);
         bgMusic.play();
 
         stage.addActor(playBtn);

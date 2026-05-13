@@ -2,6 +2,8 @@ package com.BowlORama;
 
 import java.util.ArrayList;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -42,6 +44,11 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
         private ImageButton menuButton;
         private Texture menubtntexture;
 
+
+        private Sound btnhitSound;
+        private Sound btnclickSound;
+        //private Music bgMusic;
+
         private Main game;
         private GameScreen gameScreen;
         private String Playername;
@@ -52,12 +59,14 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
             this.gameScreen = gameScreen;
             Playername = name;
         }
-        public void createScoreboard() {
+        public void createScoreboard(){
+
             createStage();
             createDrawables();
             createLabelStyle();
             createLabelStyle2();
             createLabelStyle3();
+            loadAudio();
 
             Table board = createBoard();
             Table playerboard = createPlayerBoard();
@@ -65,6 +74,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
             addFrames(board);
             addPlayerHeader(playerboard);
             addbutton(menuboard);
+
 
             stage.addActor(board );
             stage.addActor(playerboard);
@@ -75,6 +85,17 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
             stage = new Stage(new ScreenViewport());
             Gdx.input.setInputProcessor(stage);
         }
+
+    public void loadAudio(){
+
+        btnhitSound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/select.wav")
+    );
+
+        btnclickSound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/menu-click.wav")
+    );
+    }
 
         private void createDrawables() {
             // Transparent black background for frames
@@ -337,6 +358,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
             menuButton.addAction(
                 Actions.scaleTo(1.12f, 1.12f, 0.15f , Interpolation.swingOut)
             );
+            btnhitSound.play();
 
         }
 
@@ -354,6 +376,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
         public void clicked(InputEvent event , float x , float y){
             gameScreen.paused = true;
             game.setScreen(new PauseMenu(game, gameScreen , "PAUSED" , false));
+            btnclickSound.play();
+            gameScreen.bgMusic.stop();
         }
         });
 
@@ -368,6 +392,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
         public void dispose() {
             stage.dispose();
+            btnclickSound.dispose();
+            btnhitSound.dispose();
         }
 
         public Stage getStage() {

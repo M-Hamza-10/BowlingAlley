@@ -70,7 +70,7 @@ public class PauseMenu extends ScreenAdapter{
         
         bgMusic.play();
         bgMusic.setLooping(true);
-        bgMusic.setVolume(0.5f);
+        bgMusic.setVolume(0.1f);
     }
 
     public void loadAudio(){
@@ -152,6 +152,7 @@ public class PauseMenu extends ScreenAdapter{
                 game.setScreen(gameScreen);
                 dispose();
                 bgMusic.stop();
+                gameScreen.bgMusic.play();
         }
             });
 
@@ -216,7 +217,6 @@ public class PauseMenu extends ScreenAdapter{
                 // Dark scene
         Gdx.gl.glClearColor(0.02f, 0.02f, 0.04f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        
 
 
         batch.begin();

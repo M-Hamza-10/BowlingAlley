@@ -14,20 +14,20 @@ public class TurnManager {
         this.turnhandler = turnHandler;
         this.game = game;
         this.gameScreen = gameScreen;
-       player1 = new Player1("Aslam", new BowlingScore(), new Scorecardgraphics(1 , game , gameScreen , "Aslam"));
-       player2 = new Player2(new BowlingScore(), new Scorecardgraphics(2 , game , gameScreen , "Bilal"));
+       player1 = new Player1(gameScreen.player1Name, new BowlingScore(), new Scorecardgraphics(1 , game , gameScreen , gameScreen.player1Name));
+       player2 = new Player2(gameScreen.player2Name , new BowlingScore(), new Scorecardgraphics(2 , game , gameScreen , gameScreen.player2Name));
        setturn(player1);
     }
 
     public void setturn(Player player){
         currentPlayer = player;
         if(currentPlayer instanceof Player1){
-            currentPlayer.scoreDisplay.setPlayerLabel("Aslam's Turn");
-            player2.scoreDisplay.setPlayerLabel("Bilal");
+            currentPlayer.scoreDisplay.setPlayerLabel(gameScreen.player1Name + " 's Turn");
+            player2.scoreDisplay.setPlayerLabel(gameScreen.player2Name);
         }
         else{
-            currentPlayer.scoreDisplay.setPlayerLabel("Bilal's Turn");
-            player1.scoreDisplay.setPlayerLabel("Aslam");
+            currentPlayer.scoreDisplay.setPlayerLabel(gameScreen.player2Name + " 's Turn");
+            player1.scoreDisplay.setPlayerLabel(gameScreen.player1Name);
         }
 
         tempturn = currentPlayer.getturn();
@@ -77,12 +77,22 @@ public class TurnManager {
 
     public void isFinished(){
         if(player1.score.isFinished() && player2.score.isFinished()){
+            Highscoremanager.saveScore(
+                player1.name,
+                player1.score.getTotalScore()
+            );
+
+            Highscoremanager.saveScore(
+                player2.name,
+                player2.score.getTotalScore()
+            );
+            gameScreen.bgMusic.stop();
             if(player1.score.getTotalScore() > player2.score.getTotalScore()){
-                game.setScreen(new PauseMenu(game, gameScreen , "Player 1 WINS!" ,true));
+                game.setScreen(new PauseMenu(game, gameScreen , gameScreen.player1Name + " WINS!" ,true));
                 // gameScreen.dispose();
             }
             else if(player1.score.getTotalScore() < player2.score.getTotalScore()){
-                game.setScreen(new PauseMenu(game, gameScreen , "PLAYER 2 WINS!" , true));
+                game.setScreen(new PauseMenu(game, gameScreen , gameScreen.player2Name + " WINS!" , true));
                 // gameScreen.dispose();
             }
             else{

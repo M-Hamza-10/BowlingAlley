@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
@@ -21,6 +23,8 @@ public class EventHandler {
     Map map;
     ArrayList<Pins> pin;
     ArrayList<Vector3> pininitposition;
+    private Sound pinhitsound;
+    private Sound ballsound;
 
     public boolean  turnended = false;
     private boolean spidercamview = false;
@@ -42,6 +46,7 @@ public class EventHandler {
         this.map = map;
         this.pininitposition = pininitposition;
         this.pin = pin;
+        loadAudio();
     }
 
     public void handleball(float delta){
@@ -49,8 +54,9 @@ public class EventHandler {
         handlemousePhysics(5f);
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !inputblocked){
             inputblocked = true;
-           collisionDetector.shootBall(new Vector3(0f,0f, 150f));
+           collisionDetector.shootBall(new Vector3(0f,0f, 180f));
            thrown = true;
+           ballsound.play();
             collisionDetector.getBallBody().getWorldTransform().getTranslation(pos);  
         }
         handlecamera(delta);
@@ -63,7 +69,18 @@ public class EventHandler {
             turnended = true;
             reset(delta);
         }
+        detectcollison();
 
+    }
+
+    public void loadAudio(){
+        pinhitsound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/pins_down.mp3")
+    );
+
+        ballsound = Gdx.audio.newSound(
+        Gdx.files.internal("sound/select.wav")
+    );
     }
 
     private void handlecamera(float delta){
@@ -172,7 +189,7 @@ public void resetpins() {
         btRigidBody body = collisionDetector.getPinBodies().get(i);
         //body.setActivationState(Collision.ACTIVE_TAG);
         Matrix4 transform = new Matrix4();
-
+        pin.get(i).hit = false;
         transform.set(
             pininitposition.get(i),
             pin.get(i).getpinrotation()   // original upright quaternion
@@ -200,7 +217,7 @@ public void resetpins() {
 
         int pinsdown = 0;
 
-        float tolerance = 0.19f;
+        float tolerance = 0.18f;
         for(int i = 0 ; i < pininitposition.size() ; i++){
             
             Quaternion a = collisionDetector.getpinbodyrotation(i);
@@ -214,4 +231,38 @@ public void resetpins() {
         return pinsdown;
     }
 
+    public void detectcollison(){
+
+        Vector3 ballPos = new Vector3();
+        ball.ballScene.modelInstance.transform.getTranslation(ballPos);
+
+        float ballRadius = 0.7f;
+
+        for (Pins i : pin) {
+
+            Vector3 pinPos = i.getpinlocation();
+
+            float pinRadius = 0.3f;
+
+            float radiusSum = ballRadius + pinRadius;
+
+            if (!i.hit &&
+                ballPos.dst2(pinPos) <= radiusSum * radiusSum) {
+
+                i.hit = true;
+                pinhitsound.play();
+            }
+        }
+        }
+
+        public void dispose(){
+            pinhitsound.dispose();
+            ball.dispose();
+            ballsound.dispose();
+            for(Pins i : pin){
+                i.dispose();
+            }
+            map.dispose();
+            collisionDetector.dispose();
+        }
 }

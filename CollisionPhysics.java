@@ -50,7 +50,7 @@ public class CollisionPhysics {
     private Map map;
     private ArrayList<Pins> pin;
     private Ball ball;
-    private float ballradius = 0.6f;
+    private float ballradius = 0.8f;
 
     public CollisionPhysics(Map map , ArrayList<Pins> pin , Ball ball) {
 

@@ -3,8 +3,8 @@ package com.BowlORama;
 public class Player2 extends Player{
 
 
-    public Player2(BowlingScore score , Scorecardgraphics scoreDisplay){
-        super("COMPUTER");
+    public Player2(String name , BowlingScore score , Scorecardgraphics scoreDisplay){
+        super(name);
         this.score = score;
         this.scoreDisplay = scoreDisplay;
         initscoreboard();
